@@ -101,7 +101,7 @@
 
 
 
-  <meta name="keywords" content="leetcode," />
+  <meta name="keywords" content="leetcode,algorithm," />
 
 
 
@@ -112,17 +112,18 @@
 
 
 
-<meta name="description" content="LeetCode 29题，在不使用乘法、除法或者模运算的情况下两数相除。">
+<meta name="description" content="LeetCode 29，在不使用乘法、除法或者模运算的情况下实现 dividend &#x2F; divisor ，并回传结果res。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="leetcode_29">
 <meta property="og:url" content="https://fluoxtin.github.io/2021/04/10/leetcode-29/index.html">
 <meta property="og:site_name" content="Fluoxtin&#39;s blog">
-<meta property="og:description" content="LeetCode 29题，在不使用乘法、除法或者模运算的情况下两数相除。">
+<meta property="og:description" content="LeetCode 29，在不使用乘法、除法或者模运算的情况下实现 dividend &#x2F; divisor ，并回传结果res。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-04-10T09:01:46.000Z">
-<meta property="article:modified_time" content="2021-04-10T09:09:38.310Z">
+<meta property="article:modified_time" content="2021-04-10T10:32:19.531Z">
 <meta property="article:author" content="Fluoxtin">
 <meta property="article:tag" content="leetcode">
+<meta property="article:tag" content="algorithm">
 <meta name="twitter:card" content="summary">
 
 
@@ -363,10 +364,21 @@
       
 
       
-        <p>LeetCode 29题，在不使用乘法、除法或者模运算的情况下两数相除。</p>
+        <p>LeetCode 29，在不使用乘法、除法或者模运算的情况下实现 <code>dividend / divisor</code> ，并回传结果<code>res</code>。</p>
 <a id="more"></a>
 
-<h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><h1 id="时间复杂度"><a href="#时间复杂度" class="headerlink" title="时间复杂度"></a>时间复杂度</h1><h1 id="空间复杂度"><a href="#空间复杂度" class="headerlink" title="空间复杂度"></a>空间复杂度</h1><h2 id="遇到的坑"><a href="#遇到的坑" class="headerlink" title="遇到的坑"></a>遇到的坑</h2>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>由于不能使用乘除和模运算，所以在这里我选择最简单的数学运算——加法。我一开始的思路是 <code>divisor</code> 自加，然后用 <code>res</code> 记录 <code>divisor</code> 自加的个数，最后回传结果，但是提交后——“Time out”。显然这个暴力求解的方法在这里不适用，进而我想到将 <code>divisor</code> 按倍增加，也就是利用等比数列求和的方法进行求解，以此减少运算次数，缩短运算时间。</p>
+<p>其实这里也用到了递归的思想，在 <code>divisor</code> 不断地累加过程中，<code>dividend</code> 也在做减法，然后比较两者，如果 <code>dividend &lt; sum</code>（为了不改变divisor的值，sum 为divisor累加结果）,执行递归，直到 <code>dividend &lt; divisor</code>返回结果。  </p>
+<h2 id="遇到的坑"><a href="#遇到的坑" class="headerlink" title="遇到的坑"></a>遇到的坑</h2><h4 id="边界问题"><a href="#边界问题" class="headerlink" title="边界问题"></a>边界问题</h4><p>环境只能存储32位有符号整数，数值范围是 <code>[-2147483648, 2147483647]</code>，本题中如果除法结果溢出，则返回 <code>2^31 - 1</code> ，即 <code>-2^31 / -1</code> 时，返回结果 <code>2^31 - 1</code> </p>
+<h4 id="符号问题"><a href="#符号问题" class="headerlink" title="符号问题"></a>符号问题</h4><p>这里之所谓谈到符号，是因为对符号事先处理后，对后续的代码编写更有益，如果不处理符号，我们可能就需要写上几个 <code>if</code> 语句对两个数的符号进行判断。而一开始将除数和被除数的符号统一，然后用 <code>tag</code> 标记，这会使后续代码美观很多，同时也改善了对数的处理。在这里，我选择将两数符号统一为负，这样不会产生溢出，而选择为正，则需要对 <code>-2^31</code> 进行判断。</p>
+<h4 id="res计数"><a href="#res计数" class="headerlink" title="res计数"></a>res计数</h4><p><code>res</code>在累加过程中，多加了一次自身，所以在返回结果的时候，<code>res - 1</code></p>
+<h1 id="算法思想"><a href="#算法思想" class="headerlink" title="算法思想"></a>算法思想</h1><p>核心代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (dividend &lt; sum) &#123;  <span class="comment">//初始 sum = divisor</span></span><br><span class="line">    dividend = dividend - sum;</span><br><span class="line">    <span class="comment">// sum按倍增加，同时预防sum值越界</span></span><br><span class="line">    <span class="keyword">if</span> ((Integer.MIN_VALUE - sum) &lt; sum ) sum = sum + sum;  </span><br><span class="line">        res = res + res;  <span class="comment">// 记录次数</span></span><br><span class="line">        <span class="keyword">if</span> (dividend &gt;= sum) &#123;</span><br><span class="line">            res = res + divideres(dividend, divisor);   <span class="comment">//执行递归</span></span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="时间复杂度"><a href="#时间复杂度" class="headerlink" title="时间复杂度"></a>时间复杂度</h2><p>在这里因为用到了等比数列的思想，所以时间复杂度为 <code>olog(n)</code></p>
+<h2 id="空间复杂度"><a href="#空间复杂度" class="headerlink" title="空间复杂度"></a>空间复杂度</h2><p>因为只用到常数个变量，所以空间复杂度为 <code>olog(1)</code></p>
+<p><a href="https://leetcode-cn.com/problems/divide-two-integers/" target="_blank" rel="noopener">LeetCode完整代码</a></p>
+
       
     </div>
     
@@ -384,6 +396,8 @@
         <div class="post-tags">
           
             <a href="/tags/leetcode/" rel="tag"># leetcode</a>
+          
+            <a href="/tags/algorithm/" rel="tag"># algorithm</a>
           
         </div>
       
@@ -500,7 +514,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
@@ -563,7 +577,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#思路"><span class="nav-number">1.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#时间复杂度"><span class="nav-number">2.</span> <span class="nav-text">时间复杂度</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#空间复杂度"><span class="nav-number">3.</span> <span class="nav-text">空间复杂度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#遇到的坑"><span class="nav-number">3.1.</span> <span class="nav-text">遇到的坑</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#思路"><span class="nav-number">1.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#遇到的坑"><span class="nav-number">2.</span> <span class="nav-text">遇到的坑</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#边界问题"><span class="nav-number">2.0.1.</span> <span class="nav-text">边界问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#符号问题"><span class="nav-number">2.0.2.</span> <span class="nav-text">符号问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#res计数"><span class="nav-number">2.0.3.</span> <span class="nav-text">res计数</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#算法思想"><span class="nav-number"></span> <span class="nav-text">算法思想</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#时间复杂度"><span class="nav-number">1.</span> <span class="nav-text">时间复杂度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#空间复杂度"><span class="nav-number">2.</span> <span class="nav-text">空间复杂度</span></a></li></ol></div>
             
 
           </div>
