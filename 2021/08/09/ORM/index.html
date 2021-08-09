@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/Pisces.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/32x32Pisces.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/16x16Pisces.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/Pisces.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Object&#x2F;Relation Mapping 对象关系映射，是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的资料之间的转换。实际实现相当于创建了一个可在编程语言中使用的“虚拟对象数据库”，简言之，ORM 就是通过实例对象的语法，完成关系型数据库的操作的技术。 为什么会有 ORM在面向对象设计中，我们的设计原则基于软件工程的基本原则（如耦合，聚合，封装），而关系数据库则是从数学的理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 平台上的 ORM 性能测试">
+<meta property="og:url" content="https://fluoxtin.github.io/2021/08/09/ORM/index.html">
+<meta property="og:site_name" content="Fluoxtin&#39;s blog">
+<meta property="og:description" content="Object&#x2F;Relation Mapping 对象关系映射，是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的资料之间的转换。实际实现相当于创建了一个可在编程语言中使用的“虚拟对象数据库”，简言之，ORM 就是通过实例对象的语法，完成关系型数据库的操作的技术。 为什么会有 ORM在面向对象设计中，我们的设计原则基于软件工程的基本原则（如耦合，聚合，封装），而关系数据库则是从数学的理">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://fluoxtin.github.io/2021/08/09/ORM/Insert.png">
+<meta property="og:image" content="https://fluoxtin.github.io/2021/08/09/ORM/Insert_One.png">
+<meta property="og:image" content="https://fluoxtin.github.io/2021/08/09/ORM/Load.png">
+<meta property="og:image" content="https://fluoxtin.github.io/2021/08/09/ORM/Update.png">
+<meta property="og:image" content="https://fluoxtin.github.io/2021/08/09/ORM/Delete.png">
+<meta property="og:image" content="https://fluoxtin.github.io/2021/08/09/ORM/QueryByString.png">
+<meta property="og:image" content="https://fluoxtin.github.io/2021/08/09/ORM/QueryById.png">
+<meta property="article:published_time" content="2021-08-09T11:09:22.000Z">
+<meta property="article:modified_time" content="2021-08-09T11:31:25.273Z">
+<meta property="article:author" content="Fluoxtin">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://fluoxtin.github.io/2021/08/09/ORM/Insert.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","offset":12,"b2t":true,"scrollpercent":false,"onmobile":"ture"},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":"ture","async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://fluoxtin.github.io/2021/08/09/ORM/"/>
+
+
+
+
+
+  <title>Android 平台上的 ORM 性能测试 | Fluoxtin's blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Fluoxtin's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            About
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://fluoxtin.github.io/2021/08/09/ORM/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fluoxtin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/wallhaven-73kv63.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Fluoxtin's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 平台上的 ORM 性能测试</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2021-08-09T19:09:22+08:00">
+                2021-08-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <a id="more"></a>
+<!-- ## 什么是 ORM -->
+<p>Object/Relation Mapping 对象关系映射，是一种程序设计技术，用于实现面向对象编程语言里不同类型系统的资料之间的转换。实际实现相当于创建了一个可在编程语言中使用的“虚拟对象数据库”，简言之，ORM 就是通过实例对象的语法，完成关系型数据库的操作的技术。</p>
+<h2 id="为什么会有-ORM"><a href="#为什么会有-ORM" class="headerlink" title="为什么会有 ORM"></a>为什么会有 ORM</h2><p>在面向对象设计中，我们的设计原则基于软件工程的基本原则（如耦合，聚合，封装），而关系数据库则是从数学的理论发展而来，两者理论依据相差 甚远，为了解决这种不匹配的现象，对象关系映射技术应运而生。</p>
+<h2 id="GreenDao"><a href="#GreenDao" class="headerlink" title="GreenDao"></a>GreenDao</h2><h3 id="简单介绍"><a href="#简单介绍" class="headerlink" title="简单介绍"></a>简单介绍</h3><p>GreenDao 是面向 Android 的一种轻量级的快捷的 ORM 框架，可以将对象映射到数据库中，底层数据库采用 SQLite DataBase。它针对 Android 进行了高度优化，性能最大化的同时内存消耗极少，此外还支持数据库加密。</p>
+<h3 id="使用指南"><a href="#使用指南" class="headerlink" title="使用指南"></a>使用指南</h3><h4 id="引入依赖库"><a href="#引入依赖库" class="headerlink" title="引入依赖库"></a>引入依赖库</h4><p>Project ：build.gradle</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">classpath <span class="string">"org.greenrobot:greendao-gradle-plugin:3.3.0"</span></span><br></pre></td></tr></table></figure>
+
+<p>App : build.gradle</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">apply plugin: <span class="string">'org.greenrobot.greendao'</span></span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    implementation <span class="string">'org.greenrobot:greendao:3.3.0'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="编写实体类"><a href="#编写实体类" class="headerlink" title="编写实体类"></a>编写实体类</h4><p>BaseUser.class</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> id;</span><br><span class="line">    <span class="keyword">private</span> String firstName;</span><br><span class="line">    <span class="keyword">private</span> String lastName;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Build project 后同步 User 类，并生成相应的 UserDao 类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> id;</span><br><span class="line">    <span class="keyword">private</span> String firstName;</span><br><span class="line">    <span class="keyword">private</span> String lastName;</span><br><span class="line">    <span class="meta">@Generated</span>(hash = <span class="number">536362945</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">User</span><span class="params">(<span class="keyword">long</span> id, String firstName, String lastName)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">        <span class="keyword">this</span>.firstName = firstName;</span><br><span class="line">        <span class="keyword">this</span>.lastName = lastName;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于注解 ：</p>
+<ul>
+<li>@Entity<br>标识当前类是一个实体类，需要在数据库中建立数据表</li>
+<li>@Id<br>实体所对应的数据库中表的主键</li>
+<li>@Property<br>对应表中字段，如果不设置，则默认 就 java 类属性对应相同的字段</li>
+<li>@NotNull<br>标识属性不能为空</li>
+<li>@Index<br>指定一个属性作为索引中的字段</li>
+<li>@Transient<br>标识当前属性不希望被保存，只是一个暂时的状态</li>
+<li>@Convert<br>用于数据类型的转换</li>
+</ul>
+<h4 id="获取并使用-Dao-类"><a href="#获取并使用-Dao-类" class="headerlink" title="获取并使用 Dao 类"></a>获取并使用 Dao 类</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DBManager</span></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (sOpenHelper == <span class="keyword">null</span>) &#123;</span><br><span class="line">            sOpenHelper = <span class="keyword">new</span> DaoMaster.DevOpenHelper(</span><br><span class="line">                    context,</span><br><span class="line">                    DATABASE_NAME</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line">        Database database = sOpenHelper.getWritableDb();</span><br><span class="line">        mDaoSession = <span class="keyword">new</span> DaoMaster(database).newSession();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> DaoSession <span class="title">getDaoSession</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mDaoSession;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">···</span><br><span class="line"></span><br><span class="line">userDao = DBManager.getDaoSession().getUserDao();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 进行增、删、改、查</span></span><br><span class="line">User user = <span class="keyword">new</span> User();</span><br><span class="line">user.setFirstName(<span class="string">"firstName"</span>);</span><br><span class="line">user.setLastName(<span class="string">"lastName"</span>);</span><br><span class="line"></span><br><span class="line">userDao.insert(user); <span class="comment">// 插入新的数据</span></span><br><span class="line"></span><br><span class="line">userDao.update(user); <span class="comment">// 更新数据</span></span><br><span class="line"></span><br><span class="line">userDao.delete(user); <span class="comment">// 删除数据</span></span><br><span class="line"></span><br><span class="line">userDao.loadAll();    <span class="comment">// 加载全部数据</span></span><br><span class="line"></span><br><span class="line">userDao.load(user.getId); <span class="comment">//通过 Id 加载数据</span></span><br></pre></td></tr></table></figure>
+<h4 id="条件查询"><a href="#条件查询" class="headerlink" title="条件查询"></a>条件查询</h4><p>通过调用 Dao 的 queryBuild() 方法，我们可以获得一个 QueryBuild 对象，使用以下方法可以进行条件查询： </p>
+<ul>
+<li>limit()<br>限制查找的长度 </li>
+<li>offset()<br>设置查找时的偏移量</li>
+<li>where()<br>传入一个 WhereCondition 参数，进行查询，如 UserDao.Properties.FirstName.like(“%tom%”)。</li>
+<li>or()<br>可设置 多个 WhereCondition 参数。</li>
+<li>orderAsc()<br>查询结果以升序排列，默认按 id 进行排列。</li>
+<li>orderDesc()<br>查询结果以降序排列，默认按 id 进行排序。</li>
+</ul>
+<p>使用 build() 方法返回一个 Query 对象，使用 Query 对象的 list() 方法可以返回一个 List 对象，也可以使用 listLazy() 方法返回一个 LazyList 对象( LazyList 的实现原理时通过持有数据库 cursor 实现的，在使用完毕后需要调用 close() 方法关闭 cursor)。</p>
+<h3 id="底层原理"><a href="#底层原理" class="headerlink" title="底层原理"></a>底层原理</h3><ul>
+<li><p>DaoMaster &amp; DaoSession<br>这两个类，是在引入 GreenDao 的依赖库，并创建好实体类后，Build 项目自动生成的，于此同时生成的类是根据所写实体类生成的 Dao 类。相关流程如下：<br>DaoMaster(Database) -&gt; registerDaoClass() -&gt; 创建 TableStatements，用于数据库 SQL 语句操作，将其封装在 daoConfig 中并添加到 dapConfigMap。<br>DaoMaster.newSession -&gt;  DaoSession(db, IdentityScopeType, Session, daoConfigMap) -&gt; 通过 DaoConfigMap 得到 DaoConfig，创建实体 Dao 类，例如 BaseUserDao。</p>
+</li>
+<li><p>OpenHelper<br>OpenHelper 类是 DaoMaster 中的一个抽象内部类，继承自 DataBaseOpenHelper，内有两个构造方法。重写了父类的 onCreate() 方法，在数据库未创建时调用，在这个方法内部调用了 createAllTable() 方法根据所写的实体类创建相应的表。</p>
+</li>
+<li><p>DevOpenHelper<br>先看代码，这是 DaoMaster 中的一个静态内部类，继承自 OpenHelper，内有两个构造方法，参数同上。重写了父类的 onUpgrade() 方法，这个方法在数据库版本号不一样时调用（当前版本需要比原来版本大），删除原有数据库，并重建。<br>这里没有对原有数据进行保存，所以在实际应用中，我们应用自己定义 OpenHelper 类，在数据库版本更新时导出数据到新版本库中。</p>
+</li>
+</ul>
+<p>不管时创建数据库还是创建表，都是使用的 SQL 语句实现的，GreenDao 将 SQL 语句拼凑封装起来，所以在实际使用中我们不必接触 SQL 语句，用起来会相对方便。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">OpenHelper</span> <span class="keyword">extends</span> <span class="title">DatabaseOpenHelper</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">OpenHelper</span><span class="params">(Context context, String name)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(context, name, SCHEMA_VERSION);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">OpenHelper</span><span class="params">(Context context, String name, CursorFactory factory)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(context, name, factory, SCHEMA_VERSION);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Database db)</span> </span>&#123;</span><br><span class="line">            Log.i(<span class="string">"greenDAO"</span>, <span class="string">"Creating tables for schema version "</span> + SCHEMA_VERSION);</span><br><span class="line">            createAllTables(db, <span class="keyword">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">DevOpenHelper</span> <span class="keyword">extends</span> <span class="title">OpenHelper</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">DevOpenHelper</span><span class="params">(Context context, String name)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(context, name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">DevOpenHelper</span><span class="params">(Context context, String name, CursorFactory factory)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(context, name, factory);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onUpgrade</span><span class="params">(Database db, <span class="keyword">int</span> oldVersion, <span class="keyword">int</span> newVersion)</span> </span>&#123;</span><br><span class="line">            Log.i(<span class="string">"greenDAO"</span>, <span class="string">"Upgrading schema from version "</span> + oldVersion + <span class="string">" to "</span> + newVersion + <span class="string">" by dropping all tables"</span>);</span><br><span class="line">            dropAllTables(db, <span class="keyword">true</span>);</span><br><span class="line">            onCreate(db);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<!-- getWritableDb()  获取一个可写数据库
+    getReadableDb()  获取一个可读数据库
+    getEncryptedWritableDb()  获取一个加密的可写数据库
+    getEncryptedReadableDb()  获取一个加密的可读数据库 -->
+
+<ul>
+<li>SqlUtils<br>这是 GreenDao 库提供的一个类，里面通过拼接 Sql 语句，封装成方法，供上层调用。例如：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Sql for updating </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">createSqlUpdate</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    String tablename, </span></span></span><br><span class="line"><span class="function"><span class="params">    String[] updateColumns, </span></span></span><br><span class="line"><span class="function"><span class="params">    String[] whereColumns</span></span></span><br><span class="line"><span class="function"><span class="params">    )</span> </span>&#123;</span><br><span class="line">        String quotedTablename = <span class="string">'"'</span> + tablename + <span class="string">'"'</span>;</span><br><span class="line">        StringBuilder builder = <span class="keyword">new</span> StringBuilder(<span class="string">"UPDATE "</span>);</span><br><span class="line">        builder.append(quotedTablename).append(<span class="string">" SET "</span>);</span><br><span class="line">        appendColumnsEqualPlaceholders(builder, updateColumns);</span><br><span class="line">        builder.append(<span class="string">" WHERE "</span>);</span><br><span class="line">        appendColumnsEqValue(builder, quotedTablename, whereColumns);</span><br><span class="line">        <span class="keyword">return</span> builder.toString();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="ObjectBox"><a href="#ObjectBox" class="headerlink" title="ObjectBox"></a>ObjectBox</h2><h3 id="简单介绍-1"><a href="#简单介绍-1" class="headerlink" title="简单介绍"></a>简单介绍</h3><p>ObjectBox 是一种对象数据库，它与其他数据库不同点在于，它没有行，列和数据库。数据的存储采用 mdb 文件进行存储。</p>
+<h3 id="使用指南-1"><a href="#使用指南-1" class="headerlink" title="使用指南"></a>使用指南</h3><h4 id="引入依赖"><a href="#引入依赖" class="headerlink" title="引入依赖"></a>引入依赖</h4><p>Project ：build.gradle</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">classpath <span class="string">"io.objectbox:objectbox-gradle-plugin: 2.9.1"</span></span><br></pre></td></tr></table></figure>
+<p>App : build.gradle </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dependences &#123;</span><br><span class="line">    annotationProcessor <span class="string">'io.objectbox:objectbox-processor:2.9.2-RC3'</span></span><br><span class="line">    debugImplementation <span class="string">'io.objectbox:objectbox-android-objectbrowser:2.9.2-RC3'</span></span><br><span class="line">    releaseImplementation <span class="string">'io.objectbox:objectbox-android:2.9.1'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当使用 ObjectBrowser 时，需要把 objectbox 的 plugin 添加到依赖的后面，不然会报错</span></span><br><span class="line">apply plugin : <span class="string">'io.objectbox'</span></span><br></pre></td></tr></table></figure>
+<h4 id="编写实体类-1"><a href="#编写实体类-1" class="headerlink" title="编写实体类"></a>编写实体类</h4><p>User.class</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">long</span> id;</span><br><span class="line">    <span class="keyword">private</span> String firstName;</span><br><span class="line">    <span class="keyword">private</span> String lastName;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>写完实体类后，Build project 会生成一个 <code>MyObjectBox</code> 类，一个 User_ 类和一个UserCursor。通过 MyObjectBox 获取数据库（BoxStore）, 通过数据库获取对应的表（Box）, 而后即可以进行 CRUD 操作。</p>
+<h4 id="获取并使用-Box"><a href="#获取并使用-Box" class="headerlink" title="获取并使用 Box"></a>获取并使用 Box</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        mBoxStore = MyObjectBox.builder()</span><br><span class="line">                .androidContext(context.getApplicationContext())</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> BoxStore <span class="title">getBoxStore</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mBoxStore;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"><span class="comment">// 获取 box 对象来进行 CURD 操作</span></span><br><span class="line">Box&lt;User&gt; userBox = ObjectBox</span><br><span class="line">                    .getBoxStore()</span><br><span class="line">                    .boxFor(User<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">User user = <span class="keyword">new</span> User();</span><br><span class="line">user.setFirstName(<span class="string">"firstName"</span>);</span><br><span class="line">user.setLastName(<span class="string">"lastName"</span>);</span><br><span class="line"></span><br><span class="line">userBox.put(user);         <span class="comment">// 插入一条数据，如果数据库中已有，则更新数据 </span></span><br><span class="line">userBox.get(user.getId()); <span class="comment">// 通过 id 就进行获取一条数据</span></span><br><span class="line">userBox.getAll();          <span class="comment">// 获取数据库中的全部数据</span></span><br><span class="line">userBox.remove(user);      <span class="comment">// 删除表中一条数据</span></span><br><span class="line">userBox.removeAll();       <span class="comment">// 删除数据库表中所有数据</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="条件查询-1"><a href="#条件查询-1" class="headerlink" title="条件查询"></a>条件查询</h4><p>通过调用 Box 对象的 query() 方法可以获得一个 QueryBuild 对象，通过调用这个对象的一些方法，可以实现条件查询。</p>
+<ul>
+<li>contains()<br>用于查询某个属性包含一个 value。传入参数 Property (实体类属性，由 User_ 提供)，value (提供的条件)，StringOrder（区别是否大小写敏感，默认不敏感）。</li>
+<li>equal()<br>用于查询某种属性匹配一个 value 的数据。传入参数 Property，value</li>
+<li>order()<br>定义查询结果排序的顺序，传入参数 Property。</li>
+<li>less()<br>查询某种属性小于 value 的数据。传入参数 Property，value。</li>
+<li>greater()<br>查询某种属性大于 value 的数据。传入参数 Property，value。</li>
+<li>startWith()<br>查询属性以 value 开始的数据。传入参数 Property， value。</li>
+<li>endWith()<br>查询属性以 value 结束的数据。传入参数 Property， value。</li>
+</ul>
+<p>定制条件查询后使用 build() 方法获得一个 Query 对象，使用这个对象的 find(offset, limit) 方法可以获取查询结果。offset 为偏移量，limit 为加载上限，也可以使用 findLazy() 方法获得一个 LazyList 对象。</p>
+<h3 id="底层原理-1"><a href="#底层原理-1" class="headerlink" title="底层原理"></a>底层原理</h3><ul>
+<li>MyObjectBox<br>对外提供 builder() 方法返回 BoxStoreBuilder，用于创建数据库。getModel() 返回 Model，这里的 model 是给 Native 层创建数据库用的。同时使用 ModelBuilder 将 Entity 和 EntityInfo 关联起来。</li>
+<li>BoxStore<br>代表着整个数据库，由 BoxStoreBuilder 生成。BoxStore 加载了所有的 Native 库，调用 Native 方法创建数据库，调用 Native 方法依次创建数据库表。创建并管理 Box、Transcation。</li>
+<li>Box<br>用于进行 Entity 的 CURD 操作。这里需要了解 Transcation 和 Cursor。</li>
+<li>Transaction<br>数据库管理系统执行中的一个逻辑单位，ObjectBox 中的 BoxStore 是作用之一是用来创建和管理 Transaction。所有的 Transaction 都是通过 BoxStore 的内部方法 beginTx() 和 beginReadTx() 生成。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Transaction <span class="title">beginTx</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        checkOpen();</span><br><span class="line">        <span class="keyword">int</span> initialCommitCount = commitCount;</span><br><span class="line">        <span class="comment">// 调用 nativie 创建事务，返回事务句柄</span></span><br><span class="line">        <span class="keyword">long</span> nativeTx = nativeBeginTx(handle);</span><br><span class="line">        <span class="keyword">if</span>(nativeTx == <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> DbException(<span class="string">"Could not create native transaction"</span>);</span><br><span class="line">        Transaction tx = <span class="keyword">new</span> Transaction(<span class="keyword">this</span>, nativeTx, initialCommitCount);</span><br><span class="line">        <span class="keyword">synchronized</span> (transactions) &#123;</span><br><span class="line">            transactions.add(tx);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> tx;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Transaction <span class="title">beginReadTx</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        checkOpen();</span><br><span class="line">        <span class="keyword">int</span> initialCommitCount = commitCount;</span><br><span class="line">        <span class="comment">// 调用 native 创建一个只读事务，返回事务句柄。</span></span><br><span class="line">        <span class="keyword">long</span> nativeTx = nativeBeginReadTx(handle);</span><br><span class="line">        <span class="keyword">if</span>(nativeTx == <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> DbException(<span class="string">"Could not create native read transaction"</span>);</span><br><span class="line"></span><br><span class="line">        Transaction tx = <span class="keyword">new</span> Transaction(<span class="keyword">this</span>, nativeTx, initialCommitCount);</span><br><span class="line">        <span class="keyword">synchronized</span> (transactions) &#123;</span><br><span class="line">            transactions.add(tx);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> tx;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+<li>Cursor<br>数据库游标，ObjectBox 会为实体类 User 生成一个 UserCursor 类，而所有针对 User 的 CURD 操作实际都是在这个地方发生的。所有游标的创建都必须调用 Transaction 的 createCursor 方法，拿到游标，就可以调用相关方法，进行 CURD 操作。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;T&gt; <span class="function">Cursor&lt;T&gt; <span class="title">createCursor</span><span class="params">(Class&lt;T&gt; entityClass)</span> </span>&#123;</span><br><span class="line">        checkOpen();</span><br><span class="line">        EntityInfo&lt;T&gt; entityInfo = store.getEntityInfo(entityClass);</span><br><span class="line">        CursorFactory&lt;T&gt; factory = entityInfo.getCursorFactory();</span><br><span class="line">        <span class="comment">// 调用 native 传入 transcation 的句柄、数据库名，以及实体类，创建 cursor，并返回 cursor 的句柄 </span></span><br><span class="line">        <span class="keyword">long</span> cursorHandle = nativeCreateCursor(transaction, entityInfo.getDbName(), entityClass);</span><br><span class="line">        <span class="keyword">if</span>(cursorHandle == <span class="number">0</span>) <span class="keyword">throw</span> <span class="keyword">new</span> DbException(<span class="string">"Could not create native cursor"</span>);</span><br><span class="line">        <span class="comment">// 调用 factory 创建 Cursor 对象，传入 cursor 句柄。</span></span><br><span class="line">        <span class="keyword">return</span> factory.createCursor(<span class="keyword">this</span>, cursorHandle, store);</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line"><span class="comment">// Cursor&lt;T&gt; 抽象类</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">(<span class="keyword">long</span> key)</span> </span>&#123;  <span class="comment">// 根据 key 获取 entity</span></span><br><span class="line">        <span class="keyword">return</span> (T) nativeGetEntity(cursor, key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">next</span><span class="params">()</span> </span>&#123;        <span class="comment">// 查询 cursor下一个数据</span></span><br><span class="line">        <span class="keyword">return</span> (T) nativeNextEntity(cursor);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> T <span class="title">first</span><span class="params">()</span> </span>&#123;       <span class="comment">// 查询第一个数据</span></span><br><span class="line">        <span class="keyword">return</span> (T) nativeFirstEntity(cursor);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;T&gt; <span class="title">getAll</span><span class="params">()</span> </span>&#123;<span class="comment">// 获取全部数据</span></span><br><span class="line">        <span class="keyword">return</span> nativeGetAllEntities(cursor);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deleteAll</span><span class="params">()</span> </span>&#123;<span class="comment">// 删除全部</span></span><br><span class="line">        nativeDeleteAll(cursor);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+<li>EntityInfo<br>保存了 Entity 的相关信息，如名称，属性等，用于后续的一系列操作。</li>
+</ul>
+<h2 id="Realm"><a href="#Realm" class="headerlink" title="Realm"></a>Realm</h2><h3 id="简单介绍-2"><a href="#简单介绍-2" class="headerlink" title="简单介绍"></a>简单介绍</h3><p>Realm是一个跨平台的移动数据库引擎，准确来说，它是专门为移动应用所设计的数据持久化解决方案。Realm并不是对SQLite或者CoreData的简单封装，它建立了自己独特的数据库存储引擎，可以方便、高效的完成数据库的各种操作。</p>
+<h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><h4 id="引入依赖-1"><a href="#引入依赖-1" class="headerlink" title="引入依赖"></a>引入依赖</h4><p>Project : build.gradle</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">classpath <span class="string">"io.realm:realm-gradle-plugin:10.6.1"</span></span><br></pre></td></tr></table></figure>
+<p>App : build.gradle</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apply plugin : <span class="string">'realm-android'</span></span><br></pre></td></tr></table></figure>
+<h4 id="编写实体类-2"><a href="#编写实体类-2" class="headerlink" title="编写实体类"></a>编写实体类</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 实体需要继承 RealmObject 类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> <span class="keyword">extends</span> <span class="title">RealmObject</span> </span>&#123;</span><br><span class="line">    <span class="meta">@PrimaryKey</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="meta">@Index</span></span><br><span class="line">    <span class="keyword">private</span> String firstName;</span><br><span class="line">    <span class="keyword">private</span> String lastName;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// Realm 提供 RealmList 类型，关于集合类的属性</span></span><br><span class="line">    <span class="comment">// 可以使用 RealmList 进行定义</span></span><br><span class="line">    <span class="comment">// 例如 RealmListM&lt;String&gt; imageUrls;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="获取并使用-realm-对象"><a href="#获取并使用-realm-对象" class="headerlink" title="获取并使用 realm 对象"></a>获取并使用 realm 对象</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Realm.init(context);</span><br><span class="line">RealmConfiguration configuration = <span class="keyword">new</span> RealmConfiguration</span><br><span class="line">        .Builder()</span><br><span class="line">        .name(<span class="string">"myrealm.realm"</span>)  <span class="comment">// 用于设置数据库名，默认为 "default.realm"</span></span><br><span class="line">        .allowQueriesOnUiThread(<span class="keyword">true</span>) <span class="comment">// 允许在 UI 线程执行读操作</span></span><br><span class="line">        .allowWritesOnUiThread(<span class="keyword">true</span>)  <span class="comment">// 允许在 UI 线程执行写操作</span></span><br><span class="line">        .build();</span><br><span class="line">Realm.setDefaultConfiguration(configuration); <span class="comment">// 设置 config</span></span><br><span class="line">...</span><br><span class="line">Realm realm = Realm.getDefaultInstance(); <span class="comment">// 获取一个 Realm 对象</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 进行 CURD 操作</span></span><br><span class="line">realm.insert(user); <span class="comment">// 插入一个数据，这里插入的数据必须是新的，否则会跟数据库中持有的数据有冲突</span></span><br><span class="line">realm.insertOrUpdate(user); <span class="comment">// 数据库中没有该数据，则当新数据插入，有则更新</span></span><br><span class="line">realm.delete(user);  <span class="comment">// 删除一条数据</span></span><br><span class="line">realm.deleteAll();   <span class="comment">// 删除所有数据</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="条件查询-2"><a href="#条件查询-2" class="headerlink" title="条件查询"></a>条件查询</h3><p>使用 Realm 对象的 where() 方法，可以返回一个 RealmQuery 对象，使用这个对象的一些方法可以进行执行一些条件筛选。</p>
+<ul>
+<li>like()<br>用于执行模糊查询，这里的匹配的内容格式为 “*value*“</li>
+<li>beginsWith() &amp; endsWith()<br>模糊查找的一种，查找某种属性值以 value 开始或结束的数据</li>
+<li>greaterThan() &amp; lessThan() &amp; equalTo()<br>用于查询某种属性值大于/小于/等于 value 的数据</li>
+<li>contains()<br>查找某种属性值包含 value 的数据</li>
+<li>limit()<br>约定查找返回数据的上限</li>
+<li>findAll()<br>返回一个 RealmResults 类型的对象，这个对象类似于 LazyList，查看里面的数据的时候都为 null，只是存储了数据在内存中的一个引用，在我们需要的时候才去从内存中读取数据。</li>
+</ul>
+<h3 id="底层原理-2"><a href="#底层原理-2" class="headerlink" title="底层原理"></a>底层原理</h3><ul>
+<li><p>对象驱动<br>Realm 核心理念就是对象驱动，也是 Realm 的核心原则。</p>
+</li>
+<li><p>MVCC<br>MVCC(Multiversion Concurrency Control),一种多版本控制技术，和源代码管理算法类似。可将 Realm 内部的模型看作 Git，因为它包括了分支以及原子性提交的概念，无需完全复制所有数据就可以在多个分支上工作。可以执行一个语义化的写时拷贝类型而无需担心另一个线程上的写操作会对其产生影响。事务当中将会完全摒弃外界的影响。</p>
+</li>
+<li><p>零拷贝<br>在大多数 ORM 数据库中，当要访问一个对象的某个属性的时候，会先将请求转换成 SQL 语句，如果还未连接数据库则创建一个数据库连接，然后将 SQL 语句发送给硬盘执行检索，将匹配检索的数据存放到内存中。因为磁盘上的数据存储格式不能在内存中使用，还需要对数据格式反序列化。而 Realm 跳过了整个拷贝流程，首先文件始终是内存映射的，无论文件是否在内存当中，都能够访问到文件的任何内容（Realm 保证了硬盘上的文件格式都是内存可读的）。</p>
+</li>
+</ul>
+<h2 id="MMKV"><a href="#MMKV" class="headerlink" title="MMKV"></a>MMKV</h2><h3 id="简单介绍-3"><a href="#简单介绍-3" class="headerlink" title="简单介绍"></a>简单介绍</h3><p>MMKV 是基于 mmap 内存映射的 key-value 组件，底层序列化/反序列化使用 protobuf 实现，性能高，稳定性强。</p>
+<h3 id="基本用法-1"><a href="#基本用法-1" class="headerlink" title="基本用法"></a>基本用法</h3><h4 id="引入依赖-2"><a href="#引入依赖-2" class="headerlink" title="引入依赖"></a>引入依赖</h4><p>App : build.gradle</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">implementation <span class="string">'com.tencent:mmkv:1.2.10'</span></span><br></pre></td></tr></table></figure>
+<h4 id="编写实体类-3"><a href="#编写实体类-3" class="headerlink" title="编写实体类"></a>编写实体类</h4><p>User.class</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 实现 parcelable 接口来序列化/反序列化</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> <span class="keyword">implements</span> <span class="title">Parcelable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="keyword">private</span> String firstName;</span><br><span class="line">    <span class="keyword">private</span> String lastName;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="获取并使用-MMKV"><a href="#获取并使用-MMKV" class="headerlink" title="获取并使用 MMKV"></a>获取并使用 MMKV</h4><p>首先调用 MMKV 的内部方法 initialize()，传入一个 context 对象，既可以实现 MMKV 的初始化，调用 mmkvWithID() 方法可返回一个 mmkv 对象进行 CURD 操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">MMKV.initialize(context);</span><br><span class="line"></span><br><span class="line">MMKV mmkv = MMKV.defaultMMKV(); <span class="comment">// 返回一个默认的 mmkv 实例对象</span></span><br><span class="line">MMKV mmkv = MMKV.mmkvWithID(<span class="string">"name"</span>);  <span class="comment">// 指定存储数据文件的名称</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行 CURD 操作</span></span><br><span class="line">mmkv.encode(key, value);  <span class="comment">// 插入一个键值对，或更新</span></span><br><span class="line">mmkv.decodeString(key);   <span class="comment">// 通过 Key 查询数据</span></span><br><span class="line">mmkv.decodeInt(key);  </span><br><span class="line">...</span><br><span class="line">mmkv.decodeParcelable(key); <span class="comment">// 查询除基本类型外自己定义的数据</span></span><br><span class="line">mmkv.remove(key);         <span class="comment">// 通过 key 删除数据</span></span><br><span class="line">mmkv.clearAll();          <span class="comment">// 删除所有数据</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// mmkv 不支持 getAll() 方法</span></span><br><span class="line"><span class="comment">// mmkv 不能进行条件查询，mmkv 设计初衷仅是为了解决系统 crash 异常，从而设计出的一个性能高的通用的 key-value 组件。</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="底层原理-3"><a href="#底层原理-3" class="headerlink" title="底层原理"></a>底层原理</h3><ul>
+<li>内存准备<br>通过 mmap 内存映射文件，提供一段可供随时写入的内存块，由操作系统负责将内存写入文件，也就是上层不必关心数据是如何写入存储器，写入操作完全由操作系统执行。</li>
+<li>数据组织<br>数据序列化方面采用 protobuf 协议，在性能上和功能上都有不错的表现。使用的是通用的 Key/Value 组件，key 限定为 String 字符串类型，value 则是通过 protobuf 协议序列化成统一的内存块。 </li>
+<li>写入优化<br>Protobuf 不支持增量更新功能，每次写入必须全量写入，MMKV 新增了增量更新功能，将增量 kv 对象序列化后，直接 append 到内存末尾，这样同一个 Key 会有若干份数据，最新的数据在最后，那么只需要在程序启动第一次打开 MMKV 的时候，不短用后读入的数据替换之前的值，就可以保证数据是最新有效的。</li>
+<li>空间增长<br>使用 append 增量更新带来的一个新的问题，就是不断 append，文件大小会增长得不可控，例如同一个 Key 不断更新，是可能耗尽几百M甚至上G空间，然而事实上，整个 kv 文件就一个 key，不到 1K 的空间就存的下。所以 MMKV 在性能和空间上做了一个折中，以内存 pagesize 为单位申请空间，在空间用尽之前都是 append 模式，当 append 到文件末尾时，进行文件重整、Key 排重，使用序列化保存排重结果，排重后空间还是不够用的话，将文件扩大一倍，直到够用。<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">-(BOOL)append:(NSData*)data &#123;</span><br><span class="line">	<span class="keyword">if</span> (space &gt;= data.length) &#123;</span><br><span class="line">		append(fd, data);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		newData = unique(m_allKV);</span><br><span class="line">		<span class="keyword">if</span> (total_space &gt;= newData.length) &#123;</span><br><span class="line">			<span class="built_in">write</span>(fd, newData);</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">while</span> (total_space &lt; newData.length) &#123;</span><br><span class="line">				total_space *= <span class="number">2</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			ftruncate(fd, total_space);</span><br><span class="line">			<span class="built_in">write</span>(fd, newData);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>数据有效性<br>增加 crc 校验，对无效数据进行甄别。</li>
+</ul>
+<h2 id="性能比较"><a href="#性能比较" class="headerlink" title="性能比较"></a>性能比较</h2><p>ObjectBox，GreenDao，Realm，MMKV 之间的性能对比。</p>
+<ul>
+<li>一次插入 n 个实体。<img src="/2021/08/09/ORM/Insert.png" class="">
+从表中可以看出，一次插入 N 个实体，数据实体比较少的时候，ObjectBox 的速度是比较快的，但是随着插入数据量级的增加，ObjectBox 会慢于 GreenDao。</li>
+<li>一次插入 1 个实体，执行 n 次。<img src="/2021/08/09/ORM/Insert_One.png" class="">
+考虑到实际应用中，我们可能不会一次性的插入很多个实体，可能会一次存入一个实体，所以进行了这个测试，一次存入一个实体，然后存 n 次。从表中可以 ObjectBox 的插入速度是比较快的，GreenDao 和 Realm 是次之。（表中没有涉及 MMKV 是因为 MMKV 本不支持一次插入 n 个实体，所以在插入 n 个实体中，是通过一次插入一个实体实现的，需要对比可参加上一个图）</li>
+<li>查询 n 个实体。<img src="/2021/08/09/ORM/Load.png" class="">
+在加载实体这一方面，加载的实体的数量在 5000 以下时，GreenDao 的查询速度是比较快的，但是随着数量增多时，GreenDao 又会不如 ObjectBox。但是考虑到实际应用中，我们也不可能一次把数据库中的数据全部加载，我们的内存空间也没有那么大的空间，所以一次加载上限为 1000 会比较合理，故上图的加载数量上限为 1000，在下面查询实体测试中上限也是 1000。</li>
+<li>更新 n 个实体。<img src="/2021/08/09/ORM/Update.png" class=""></li>
+<li>删除 n 个实体。 <img src="/2021/08/09/ORM/Delete.png" class=""></li>
+<li>在表中条件查询数据，至多返回 1000 个实体。<img src="/2021/08/09/ORM/QueryByString.png" class="">
+<img src="/2021/08/09/ORM/QueryById.png" class="">
+
+</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>综合测试结果看，ObjectBox 的存取性能不如 GreenDao，并且其存储占用空间较大，对于目前环境来看，GreenDao 占用的优势较大，但是 GreenDao 没有一个合适的数据库迁移工具，当数据库变更时需要自己去维护。对于 Realm，其发布至今已有7年之久，在某些方面也是有它的独到之处，比如说它建立了自己的独特的数据库引擎，可以直接对对象进行读写，而不必拘泥于 SQL 语句。MMKV 可以说是在少量数据的插入删除方面做的极好，只需要将数据写入缓存区，后续的存储操作则由操作系统完成。</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">ObjectBox</th>
+<th align="center">GreenDao</th>
+<th align="center">Realm</th>
+<th align="center">MMKV</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">性能比较</td>
+<td align="center">在测试机环境不如 GreenDao</td>
+<td align="center">性能表现良好</td>
+<td align="center">性能不如 GreenDao</td>
+<td align="center">对于插入少量数据性能较好</td>
+</tr>
+<tr>
+<td align="center">存储占用</td>
+<td align="center">存储空间占用较多</td>
+<td align="center">占用少</td>
+<td align="center">占用少</td>
+<td align="center">占用少</td>
+</tr>
+<tr>
+<td align="center">使用方面</td>
+<td align="center">使用简单，容易上手，没有相匹配的工具可视化数据库</td>
+<td align="center">使用简单，学习成本低</td>
+<td align="center">使用时语言冗余</td>
+<td align="center">操作简单，学习成本低</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/04/10/leetcode-29/" rel="next" title="leetcode_29 Divide Two Integers">
+                <i class="fa fa-chevron-left"></i> leetcode_29 Divide Two Integers
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/wallhaven-73kv63.png"
+                alt="Fluoxtin" />
+            
+              <p class="site-author-name" itemprop="name">Fluoxtin</p>
+              <p class="site-description motion-element" itemprop="description">以梦为马</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/fluoxtin" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://leetcode-cn.com/u/fluoxtin" target="_blank" title="LeetCode">
+                      
+                        <i class="fa fa-fw fa-globe"></i>LeetCode</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ikvarxt.github.io" title="ikvarxt" target="_blank">ikvarxt</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么会有-ORM"><span class="nav-number">1.</span> <span class="nav-text">为什么会有 ORM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GreenDao"><span class="nav-number">2.</span> <span class="nav-text">GreenDao</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单介绍"><span class="nav-number">2.1.</span> <span class="nav-text">简单介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用指南"><span class="nav-number">2.2.</span> <span class="nav-text">使用指南</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#引入依赖库"><span class="nav-number">2.2.1.</span> <span class="nav-text">引入依赖库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编写实体类"><span class="nav-number">2.2.2.</span> <span class="nav-text">编写实体类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取并使用-Dao-类"><span class="nav-number">2.2.3.</span> <span class="nav-text">获取并使用 Dao 类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#条件查询"><span class="nav-number">2.2.4.</span> <span class="nav-text">条件查询</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#底层原理"><span class="nav-number">2.3.</span> <span class="nav-text">底层原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ObjectBox"><span class="nav-number">3.</span> <span class="nav-text">ObjectBox</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单介绍-1"><span class="nav-number">3.1.</span> <span class="nav-text">简单介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用指南-1"><span class="nav-number">3.2.</span> <span class="nav-text">使用指南</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#引入依赖"><span class="nav-number">3.2.1.</span> <span class="nav-text">引入依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编写实体类-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">编写实体类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取并使用-Box"><span class="nav-number">3.2.3.</span> <span class="nav-text">获取并使用 Box</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#条件查询-1"><span class="nav-number">3.2.4.</span> <span class="nav-text">条件查询</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#底层原理-1"><span class="nav-number">3.3.</span> <span class="nav-text">底层原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Realm"><span class="nav-number">4.</span> <span class="nav-text">Realm</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单介绍-2"><span class="nav-number">4.1.</span> <span class="nav-text">简单介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本用法"><span class="nav-number">4.2.</span> <span class="nav-text">基本用法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#引入依赖-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">引入依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编写实体类-2"><span class="nav-number">4.2.2.</span> <span class="nav-text">编写实体类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取并使用-realm-对象"><span class="nav-number">4.2.3.</span> <span class="nav-text">获取并使用 realm 对象</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#条件查询-2"><span class="nav-number">4.3.</span> <span class="nav-text">条件查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#底层原理-2"><span class="nav-number">4.4.</span> <span class="nav-text">底层原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MMKV"><span class="nav-number">5.</span> <span class="nav-text">MMKV</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#简单介绍-3"><span class="nav-number">5.1.</span> <span class="nav-text">简单介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本用法-1"><span class="nav-number">5.2.</span> <span class="nav-text">基本用法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#引入依赖-2"><span class="nav-number">5.2.1.</span> <span class="nav-text">引入依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#编写实体类-3"><span class="nav-number">5.2.2.</span> <span class="nav-text">编写实体类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#获取并使用-MMKV"><span class="nav-number">5.2.3.</span> <span class="nav-text">获取并使用 MMKV</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#底层原理-3"><span class="nav-number">5.3.</span> <span class="nav-text">底层原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#性能比较"><span class="nav-number">6.</span> <span class="nav-text">性能比较</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fluoxtin</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
